@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#faf8f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Morning">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Morning Routine</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #faf8f5; --bg-warm: #f5f0ea; --bg-card: #ffffff; --bg-card-active: #fefdfb;
+    --text-primary: #2c2825; --text-secondary: #6b6560; --text-dim: #a8a19a; --text-hint: #c8c2bb;
+    --accent-meditation: #6a8e6e; --accent-meditation-light: #e8f0e8; --accent-meditation-soft: #d1e2d2;
+    --accent-stretch: #c4915e; --accent-stretch-light: #faf0e4; --accent-stretch-soft: #edd9c4;
+    --accent-cold: #5b89a6; --accent-cold-light: #e4eff5; --accent-cold-soft: #c5dae8;
+    --accent-active: var(--accent-meditation); --accent-light: var(--accent-meditation-light); --accent-soft: var(--accent-meditation-soft);
+    --border: #ebe6e0; --border-light: #f0ece7;
+    --shadow-sm: 0 1px 3px rgba(44,40,37,0.04); --shadow-md: 0 4px 16px rgba(44,40,37,0.06);
+    --font-display: 'Fraunces', Georgia, serif; --font-body: 'Outfit', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  .ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .ambient::before { content: ''; position: absolute; width: 100%; height: 100%; background: radial-gradient(ellipse at 20% 0%, var(--accent-light) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, var(--accent-cold-light) 0%, transparent 50%); opacity: 0.5; transition: opacity 2s ease; }
+  .container { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; padding: 48px 24px 120px; }
+  .header { text-align: center; margin-bottom: 48px; animation: fadeUp 0.8s ease; }
+  .header .time-now { font-size: 12px; font-weight: 400; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-hint); margin-bottom: 20px; }
+  .header h1 { font-family: var(--font-display); font-size: clamp(32px, 7vw, 48px); font-weight: 300; line-height: 1.15; color: var(--text-primary); margin-bottom: 12px; }
+  .header h1 em { font-style: italic; font-weight: 400; color: var(--accent-active); transition: color 1.5s ease; }
+  .header .subtitle { font-size: 15px; font-weight: 300; color: var(--text-secondary); line-height: 1.6; }
+  .breathing-circle { width: 100px; height: 100px; border-radius: 50%; background: var(--accent-meditation-light); border: 1.5px solid var(--accent-meditation-soft); margin: 0 auto 24px; display: none; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-style: italic; font-weight: 400; color: var(--accent-meditation); }
+  .breathing-circle.visible { display: flex; }
+  .breathing-circle.inhale { animation: breatheIn 4s ease-in-out forwards; }
+  .breathing-circle.exhale { animation: breatheOut 4s ease-in-out forwards; }
+  @keyframes breatheIn { 0% { transform: scale(0.82); opacity: 0.5; } 100% { transform: scale(1.18); opacity: 1; } }
+  @keyframes breatheOut { 0% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(0.82); opacity: 0.5; } }
+  .global-timer { text-align: center; margin-bottom: 36px; animation: fadeUp 0.8s ease 0.1s both; }
+  .global-timer .label { font-size: 11px; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-hint); margin-bottom: 8px; }
+  .global-timer .time-display { font-family: var(--font-display); font-size: clamp(48px, 12vw, 76px); font-weight: 300; color: var(--text-primary); letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .global-timer .phase-name { font-family: var(--font-display); font-size: 17px; font-weight: 400; font-style: italic; color: var(--accent-active); margin-top: 12px; min-height: 26px; transition: color 1.5s ease; }
+  .progress-track { width: 100%; height: 3px; background: var(--border-light); border-radius: 2px; margin-bottom: 40px; overflow: hidden; animation: fadeUp 0.8s ease 0.2s both; }
+  .progress-fill { height: 100%; width: 0%; background: var(--accent-active); border-radius: 2px; transition: width 0.5s linear, background 1.5s ease; }
+  .controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 48px; animation: fadeUp 0.8s ease 0.3s both; }
+  .btn { font-family: var(--font-body); font-size: 13px; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s ease; border-radius: 48px; }
+  .btn-primary { background: var(--accent-active); color: #fff; padding: 14px 44px; box-shadow: var(--shadow-sm); transition: background 1.5s ease, transform 0.3s ease, box-shadow 0.3s ease; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-secondary { background: var(--bg-card); color: var(--text-secondary); padding: 14px 22px; border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg-warm); }
+  .btn:disabled { opacity: 0.35; cursor: default; transform: none !important; box-shadow: none !important; }
+  .section { margin-bottom: 32px; animation: fadeUp 0.8s ease both; }
+  .section:nth-child(1) { animation-delay: 0.4s; } .section:nth-child(2) { animation-delay: 0.5s; } .section:nth-child(3) { animation-delay: 0.6s; }
+  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1.5px solid var(--border-light); }
+  .section-pill { font-size: 11px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; background: var(--border-light); color: var(--text-dim); transition: all 0.5s ease; }
+  .section.active .section-pill { background: var(--accent-light); color: var(--accent-active); }
+  .section-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; color: var(--text-dim); flex: 1; transition: color 0.5s ease; }
+  .section.active .section-title { color: var(--text-primary); }
+  .section.completed .section-title, .section.completed .section-pill { opacity: 0.4; }
+  .section-duration { font-size: 12px; font-weight: 300; color: var(--text-hint); }
+  .steps { display: flex; flex-direction: column; gap: 6px; }
+  .step { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; transition: all 0.5s ease; }
+  .step.active { border-color: var(--accent-soft); background: var(--bg-card-active); box-shadow: var(--shadow-md); }
+  .step.completed { opacity: 0.35; }
+  .step-main { display: flex; align-items: center; gap: 14px; padding: 14px 18px; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: all 0.5s ease; }
+  .step.active .step-dot { background: var(--accent-active); box-shadow: 0 0 0 3px var(--accent-light); }
+  .step.completed .step-dot { background: var(--accent-soft); }
+  .step-info { flex: 1; } .step-name { font-size: 14px; font-weight: 400; color: var(--text-secondary); transition: color 0.4s ease; }
+  .step.active .step-name { color: var(--text-primary); font-weight: 500; }
+  .step-time { font-family: var(--font-display); font-size: 16px; font-weight: 300; color: var(--text-hint); min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; transition: color 0.4s ease; }
+  .step.active .step-time { color: var(--accent-active); }
+  .step-detail { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
+  .step.active .step-detail { max-height: 500px; }
+  .step-detail-inner { padding: 0 18px 18px; display: flex; gap: 18px; align-items: flex-start; opacity: 0; transform: translateY(-8px); transition: opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s; }
+  .step.active .step-detail-inner { opacity: 1; transform: translateY(0); }
+  .step-cue { font-size: 13px; font-weight: 300; color: var(--text-secondary); line-height: 1.65; padding-top: 4px; }
+  .completion { text-align: center; padding: 60px 24px; display: none; }
+  .completion.visible { display: block; animation: fadeUp 0.8s ease; }
+  .completion-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-meditation-light); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .completion h2 { font-family: var(--font-display); font-size: 34px; font-weight: 300; font-style: italic; color: var(--text-primary); margin-bottom: 12px; }
+  .completion p { font-size: 15px; font-weight: 300; color: var(--text-secondary); line-height: 1.7; max-width: 360px; margin: 0 auto 28px; }
+  .sound-toggle { position: fixed; top: 20px; right: 20px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim); font-family: var(--font-body); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 7px 14px; cursor: pointer; border-radius: 20px; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
+  .sound-toggle:hover { background: var(--bg-warm); color: var(--text-secondary); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 480px) { .container { padding: 32px 16px 100px; } .controls { flex-direction: column; align-items: stretch; } .btn-primary, .btn-secondary { width: 100%; text-align: center; } }
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()">&#9835; Sound On</button>
+<div class="container">
+  <header class="header">
+    <div class="time-now" id="timeNow"></div>
+    <h1>Your <em>morning</em> routine</h1>
+    <p class="subtitle">Meditation, stretching &amp; cold plunge &mdash; about 35 minutes</p>
+  </header>
+  <div class="breathing-circle" id="breathingCircle">breathe in</div>
+  <div class="global-timer">
+    <div class="label">Time remaining</div>
+    <div class="time-display" id="globalTime">35:00</div>
+    <div class="phase-name" id="phaseName">Ready when you are</div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="controls">
+    <button class="btn btn-primary" id="btnStart" onclick="startRoutine()">Begin</button>
+    <button class="btn btn-secondary" id="btnSkip" onclick="skipStep()" disabled>Skip</button>
+    <button class="btn btn-secondary" id="btnPause" onclick="togglePause()" disabled>Pause</button>
+  </div>
+  <div id="sectionsContainer"></div>
+  <div class="completion" id="completion">
+    <div class="completion-icon">&#10024;</div>
+    <h2>Beautifully done</h2>
+    <p>You showed up for yourself this morning. Carry this calm and clarity into whatever comes next.</p>
+    <button class="btn btn-primary" onclick="resetRoutine()">Start Again</button>
+  </div>
+</div>
+<script>
+const routineData = [
+  { title: "Meditation", accent: "--accent-meditation", light: "--accent-meditation-light", soft: "--accent-meditation-soft",
+    steps: [
+      { name: "Settle In", duration: 60, cue: "Sit comfortably \u2014 spine tall but relaxed. Close your eyes. Take three slow, deep breaths to signal your body it\u2019s time to be still.", icon: "settle-in" },
+      { name: "Anchor Your Breath", duration: 420, cue: "Breathe naturally through your nose. Focus on the sensation at your nostrils or the rise of your belly. When your mind wanders, gently return. Every return is a rep.", icon: "anchor" },
+      { name: "Expand Awareness", duration: 90, cue: "Widen your attention to your whole body. Notice tension, warmth, weight. Build the body awareness that translates to better movement.", icon: "expand" },
+      { name: "Close", duration: 30, cue: "One deep breath. Gently open your eyes. Set an intention for today if you like.", icon: "close" }
+    ]},
+  { title: "Stretching", accent: "--accent-stretch", light: "--accent-stretch-light", soft: "--accent-stretch-soft",
+    steps: [
+      { name: "Cat-Cow", duration: 60, cue: "Flow between arching and rounding your spine. Inhale into extension, exhale into flexion. Slow and controlled.", icon: "cat-cow" },
+      { name: "Thread the Needle", duration: 60, cue: "Each side. From all fours, reach one arm under your body and rotate through the thoracic spine. Key for overhead mobility.", icon: "thread-needle" },
+      { name: "World\u2019s Greatest Stretch", duration: 60, cue: "Each side. Lunge position \u2014 plant hand inside front foot, rotate and reach to the ceiling.", icon: "worlds-greatest" },
+      { name: "Pigeon Stretch", duration: 60, cue: "Each side. Front shin roughly parallel to hips. Walk hands forward and sink in. Targets deep hip external rotators.", icon: "pigeon" },
+      { name: "Couch Stretch", duration: 60, cue: "Each side. Back knee near a wall, stand tall through your torso. Intense hip flexor and quad opener.", icon: "couch" },
+      { name: "Shoulder Distraction", duration: 60, cue: "Each side. Band anchored high \u2014 step away and let it pull your arm overhead while you rotate slightly away.", icon: "shoulder" },
+      { name: "Deep Squat Hold", duration: 90, cue: "Feet shoulder width, toes slightly out. Sink deep, elbows pushing knees out. Work on keeping heels down.", icon: "deep-squat" },
+      { name: "Ankle Rocks", duration: 60, cue: "Each side. Half-kneeling, front foot flat. Drive knee slowly over toes. Crucial for pistols and clean catches.", icon: "ankle-rocks" }
+    ]},
+  { title: "Cold Plunge", accent: "--accent-cold", light: "--accent-cold-light", soft: "--accent-cold-soft",
+    steps: [
+      { name: "Prepare", duration: 60, cue: "Get to your cold water \u2014 shower, tub, or outdoor setup. Take a few deep breaths. Commit mentally before stepping in.", icon: "prepare" },
+      { name: "Cold Exposure", duration: 120, cue: "Step in. Control your breathing \u2014 slow exhale through the mouth. Start at 2 minutes, add 30 seconds each week.", icon: "cold-exposure" },
+      { name: "Warm Down", duration: 120, cue: "Step out. Let your body rewarm naturally \u2014 avoid hot showers immediately. Towel off, move gently, enjoy the clarity.", icon: "warm-down" }
+    ]}
+];
+
+let currentSection=0, currentStep=0, stepTimeRemaining=0, totalTimeRemaining=0, totalTime=0;
+let timerInterval=null, isPaused=false, isRunning=false, soundEnabled=true, breathingInterval=null;
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+
+function playTone(f,d,t='sine',v=0.06){if(!soundEnabled)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.setValueAtTime(f,audioCtx.currentTime);g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(v,audioCtx.currentTime+0.06);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d);}
+function chimeTransition(){playTone(523.25,0.7);setTimeout(()=>playTone(659.25,0.7),180);setTimeout(()=>playTone(783.99,1),360);}
+function chimeSectionComplete(){playTone(392,0.5);setTimeout(()=>playTone(523.25,0.5),220);setTimeout(()=>playTone(659.25,0.5),440);setTimeout(()=>playTone(783.99,1.2),660);}
+function chimeComplete(){[0,260,520,780,1040].forEach((d,i)=>setTimeout(()=>playTone([523.25,659.25,783.99,1046.5,783.99][i],1.3),d));}
+function tickWarning(){playTone(880,0.12,'sine',0.035);}
+function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('soundToggle').innerHTML=`&#9835; Sound ${soundEnabled?'On':'Off'}`;}
+
+function updateClock(){const n=new Date();document.getElementById('timeNow').textContent=`${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;}
+updateClock();setInterval(updateClock,10000);
+
+function formatTime(s){return `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;}
+function formatTimeLarge(s){return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;}
+function calcTotalTime(){let t=0;routineData.forEach(s=>s.steps.forEach(st=>t+=st.duration));return t;}
+
+function renderSections(){
+  const c=document.getElementById('sectionsContainer');c.innerHTML='';
+  routineData.forEach((section,si)=>{
+    const mins=Math.ceil(section.steps.reduce((a,s)=>a+s.duration,0)/60);
+    const div=document.createElement('div');div.className='section';div.id=`section-${si}`;
+    div.innerHTML=`<div class="section-header"><span class="section-pill">${si+1}</span><span class="section-title">${section.title}</span><span class="section-duration">${mins} min</span></div>
+      <div class="steps">${section.steps.map((step,sti)=>`<div class="step" id="step-${si}-${sti}"><div class="step-main"><div class="step-dot"></div><div class="step-info"><div class="step-name">${step.name}</div></div><div class="step-time" id="step-time-${si}-${sti}">${formatTime(step.duration)}</div></div><div class="step-detail"><div class="step-detail-inner"><div class="step-cue">${step.cue}</div></div></div></div>`).join('')}</div>`;
+    c.appendChild(div);
+  });
+}
+
+function setTheme(si){const d=routineData[si],r=document.documentElement;r.style.setProperty('--accent-active',`var(${d.accent})`);r.style.setProperty('--accent-light',`var(${d.light})`);r.style.setProperty('--accent-soft',`var(${d.soft})`);}
+
+function startBreathing(){stopBreathing();const el=document.getElementById('breathingCircle');if(currentSection!==0){el.classList.remove('visible');return;}el.classList.add('visible');let inh=true;function cy(){el.className='breathing-circle visible';el.textContent=inh?'breathe in':'breathe out';void el.offsetWidth;el.classList.add(inh?'inhale':'exhale');inh=!inh;}cy();breathingInterval=setInterval(cy,4000);}
+function stopBreathing(){if(breathingInterval){clearInterval(breathingInterval);breathingInterval=null;}document.getElementById('breathingCircle').classList.remove('visible');}
+
+function updateDisplay(){document.getElementById('globalTime').textContent=formatTimeLarge(totalTimeRemaining);document.getElementById('progressFill').style.width=`${((totalTime-totalTimeRemaining)/totalTime)*100}%`;const step=routineData[currentSection].steps[currentStep];document.getElementById('phaseName').textContent=`${routineData[currentSection].title} \u2014 ${step.name}`;document.getElementById(`step-time-${currentSection}-${currentStep}`).textContent=formatTime(stepTimeRemaining);}
+
+function highlightCurrent(){document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));const sEl=document.getElementById(`section-${currentSection}`),stEl=document.getElementById(`step-${currentSection}-${currentStep}`);if(sEl)sEl.classList.add('active');if(stEl){stEl.classList.add('active');stEl.scrollIntoView({behavior:'smooth',block:'center'});}}
+function markCompleted(si,sti){const el=document.getElementById(`step-${si}-${sti}`);if(el)el.classList.add('completed');}
+function markSectionCompleted(si){const el=document.getElementById(`section-${si}`);if(el){el.classList.add('completed');el.classList.remove('active');}}
+
+function tick(){
+  if(isPaused)return;stepTimeRemaining--;totalTimeRemaining--;
+  if(stepTimeRemaining===3)tickWarning();
+  if(stepTimeRemaining<=0){markCompleted(currentSection,currentStep);const sec=routineData[currentSection];
+    if(currentStep<sec.steps.length-1){currentStep++;stepTimeRemaining=sec.steps[currentStep].duration;chimeTransition();highlightCurrent();}
+    else if(currentSection<routineData.length-1){markSectionCompleted(currentSection);currentSection++;currentStep=0;stepTimeRemaining=routineData[currentSection].steps[0].duration;chimeSectionComplete();setTheme(currentSection);highlightCurrent();if(currentSection===0)startBreathing();else stopBreathing();}
+    else{clearInterval(timerInterval);stopBreathing();markSectionCompleted(currentSection);isRunning=false;chimeComplete();document.getElementById('phaseName').textContent='Complete';document.getElementById('globalTime').textContent='00:00';document.getElementById('progressFill').style.width='100%';document.getElementById('completion').classList.add('visible');document.getElementById('btnStart').disabled=true;document.getElementById('btnSkip').disabled=true;document.getElementById('btnPause').disabled=true;return;}}
+  updateDisplay();
+}
+
+function startRoutine(){if(isRunning)return;if(audioCtx.state==='suspended')audioCtx.resume();isRunning=true;isPaused=false;currentSection=0;currentStep=0;totalTime=calcTotalTime();totalTimeRemaining=totalTime;stepTimeRemaining=routineData[0].steps[0].duration;setTheme(0);highlightCurrent();updateDisplay();startBreathing();document.getElementById('btnStart').textContent='Running';document.getElementById('btnStart').disabled=true;document.getElementById('btnSkip').disabled=false;document.getElementById('btnPause').disabled=false;timerInterval=setInterval(tick,1000);chimeTransition();}
+function skipStep(){if(!isRunning||isPaused)return;totalTimeRemaining-=stepTimeRemaining;stepTimeRemaining=0;tick();}
+function togglePause(){if(!isRunning)return;isPaused=!isPaused;document.getElementById('btnPause').textContent=isPaused?'Resume':'Pause';if(isPaused)stopBreathing();else if(currentSection===0)startBreathing();}
+function resetRoutine(){clearInterval(timerInterval);stopBreathing();isRunning=false;isPaused=false;currentSection=0;currentStep=0;totalTimeRemaining=calcTotalTime();totalTime=totalTimeRemaining;document.getElementById('completion').classList.remove('visible');document.getElementById('btnStart').textContent='Begin';document.getElementById('btnStart').disabled=false;document.getElementById('btnSkip').disabled=true;document.getElementById('btnPause').disabled=true;document.getElementById('btnPause').textContent='Pause';document.getElementById('globalTime').textContent=formatTimeLarge(totalTimeRemaining);document.getElementById('phaseName').textContent='Ready when you are';document.getElementById('progressFill').style.width='0%';setTheme(0);renderSections();}
+
+totalTime=calcTotalTime();totalTimeRemaining=totalTime;document.getElementById('globalTime').textContent=formatTimeLarge(totalTimeRemaining);renderSections();
+
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
