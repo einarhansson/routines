@@ -2,7 +2,7 @@
   "name": "Morning Routine",
   "short_name": "Morning",
   "description": "Guided meditation, stretching & cold plunge timer",
-  "start_url": "./morning_routine.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#faf8f5",
   "theme_color": "#faf8f5",
