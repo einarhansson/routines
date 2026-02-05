@@ -1,6 +1,6 @@
 const CACHE_NAME = 'morning-routine-v1';
 const ASSETS = [
-  './morning_routine.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -37,6 +37,6 @@ self.addEventListener('fetch', event => {
         }
         return response;
       });
-    }).catch(() => caches.match('./morning_routine.html'))
+    }).catch(() => caches.match('./index.html'))
   );
 });
